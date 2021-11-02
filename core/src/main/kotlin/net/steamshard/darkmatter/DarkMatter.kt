@@ -1,10 +1,21 @@
 package net.steamshard.darkmatter
 
-import com.badlogic.gdx.Game
+import com.badlogic.gdx.Application.LOG_DEBUG
+import com.badlogic.gdx.Gdx
+import ktx.app.KtxGame
+import ktx.app.KtxScreen
+import ktx.log.logger
+import net.steamshard.darkmatter.screen.FirstScreen
+import net.steamshard.darkmatter.screen.SecondScreen
 
-/** [com.badlogic.gdx.ApplicationListener] implementation shared by all platforms.  */
-class DarkMatter : Game() {
+private val LOG = logger<DarkMatter>()
+
+class DarkMatter : KtxGame<KtxScreen>() {
     override fun create() {
-        setScreen(FirstScreen())
+        Gdx.app.logLevel = LOG_DEBUG
+        addScreen(FirstScreen(this))
+        addScreen(SecondScreen(this))
+        LOG.debug { "Create game instance" }
+        setScreen<FirstScreen>()
     }
 }

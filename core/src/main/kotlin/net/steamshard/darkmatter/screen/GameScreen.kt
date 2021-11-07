@@ -5,23 +5,37 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.utils.viewport.FitViewport
+import ktx.ashley.entity
+import ktx.ashley.get
+import ktx.ashley.with
 import net.steamshard.darkmatter.DarkMatter
 import ktx.log.logger
 import ktx.graphics.use
+import net.steamshard.darkmatter.UNIT_SCALE
+import net.steamshard.darkmatter.ecs.component.GraphicComponent
+import net.steamshard.darkmatter.ecs.component.TransformComponent
 
 private val LOG = logger<GameScreen>()
 
 class GameScreen(game: DarkMatter) : BaseScreen(game) {
     private val viewport = FitViewport(9f, 16f)
-    private val texture = Texture(Gdx.files.internal("graphics/ship_base.png"))
-    private val sprite = Sprite(texture).apply {
-        setSize(1f, 1f)
+    private val playerTexture = Texture(Gdx.files.internal("graphics/ship_base.png"))
+    private val player = engine.entity {
+        with<TransformComponent> {
+            position.set(0f, 0f, 0f)
+        }
+
+        with<GraphicComponent> {
+            sprite.run {
+                setRegion(playerTexture)
+                setSize(texture.width * UNIT_SCALE, texture.height * UNIT_SCALE)
+                setOriginCenter()
+            }
+        }
     }
-    private val speed = 0.1f
 
     override fun show() {
         LOG.debug { "Screen shown" }
-        sprite.setPosition(1f, 1f)
     }
 
     override fun resize(width: Int, height: Int) {
@@ -29,41 +43,23 @@ class GameScreen(game: DarkMatter) : BaseScreen(game) {
     }
 
     override fun render(delta: Float) {
+        engine.update(delta)
         viewport.apply()
 
-        batch.use(viewport.camera.combined) {
-            sprite.draw(it)
+        batch.use(viewport.camera.combined) { sbatch ->
+            player[GraphicComponent.mapper]?.let { graphic ->
+                player[TransformComponent.mapper]?.let { transform ->
+                    graphic.sprite.run {
+                        rotation = transform.rotationDeg
+                        setBounds(transform.position.x, transform.position.y, transform.size.x, transform.size.y)
+                        draw(sbatch)
+                    }
+                }
+            }
         }
-
-        var positionX = sprite.x
-        var positionY = sprite.y
-
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            positionY += speed
-        }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            positionY -= speed
-        }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            positionX -= speed
-        }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            positionX += speed
-        }
-
-        positionX += 9f
-        positionY += 16f
-
-        positionX %= 9f
-        positionY %= 16f
-
-        sprite.setPosition(positionX, positionY)
     }
 
     override fun dispose() {
-        texture.dispose()
+        playerTexture.dispose()
     }
 }

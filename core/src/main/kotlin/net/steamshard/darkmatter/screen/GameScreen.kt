@@ -18,7 +18,6 @@ import net.steamshard.darkmatter.ecs.component.TransformComponent
 private val LOG = logger<GameScreen>()
 
 class GameScreen(game: DarkMatter) : BaseScreen(game) {
-    private val viewport = FitViewport(9f, 16f)
     private val playerTexture = Texture(Gdx.files.internal("graphics/ship_base.png"))
     private val player = engine.entity {
         with<TransformComponent> {
@@ -35,31 +34,15 @@ class GameScreen(game: DarkMatter) : BaseScreen(game) {
     }
 
     override fun show() {
-        LOG.debug { "Screen shown" }
-    }
-
-    override fun resize(width: Int, height: Int) {
-        viewport.update(width, height, true)
+        LOG.debug { "GameScreen shown" }
     }
 
     override fun render(delta: Float) {
         engine.update(delta)
-        viewport.apply()
-
-        batch.use(viewport.camera.combined) { sbatch ->
-            player[GraphicComponent.mapper]?.let { graphic ->
-                player[TransformComponent.mapper]?.let { transform ->
-                    graphic.sprite.run {
-                        rotation = transform.rotationDeg
-                        setBounds(transform.position.x, transform.position.y, transform.size.x, transform.size.y)
-                        draw(sbatch)
-                    }
-                }
-            }
-        }
     }
 
     override fun dispose() {
         playerTexture.dispose()
+        game.engine.removeEntity(player)
     }
 }

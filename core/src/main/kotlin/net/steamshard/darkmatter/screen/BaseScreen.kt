@@ -9,4 +9,9 @@ abstract class BaseScreen(
     val game: DarkMatter,
     val batch: Batch = game.batch,
     val engine: Engine = game.engine
-) : KtxScreen
+) : KtxScreen {
+
+    override fun resize(width: Int, height: Int) {
+        game.gameViewport.update(width, height, true)
+    }
+}

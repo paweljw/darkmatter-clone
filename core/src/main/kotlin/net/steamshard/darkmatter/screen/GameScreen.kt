@@ -12,10 +12,7 @@ import net.steamshard.darkmatter.DarkMatter
 import ktx.log.logger
 import ktx.graphics.use
 import net.steamshard.darkmatter.UNIT_SCALE
-import net.steamshard.darkmatter.ecs.component.FacingComponent
-import net.steamshard.darkmatter.ecs.component.GraphicComponent
-import net.steamshard.darkmatter.ecs.component.PlayerComponent
-import net.steamshard.darkmatter.ecs.component.TransformComponent
+import net.steamshard.darkmatter.ecs.component.*
 
 private val LOG = logger<GameScreen>()
 
@@ -25,6 +22,7 @@ class GameScreen(game: DarkMatter) : BaseScreen(game) {
             position.set(5f, 3f, 0f)
         }
 
+        with<MoveComponent>()
         with<GraphicComponent>()
         with<PlayerComponent>()
         with<FacingComponent>()

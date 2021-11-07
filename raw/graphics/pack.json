@@ -1,0 +1,18 @@
+{
+	pot: true,
+	paddingX: 2,
+	paddingY: 2,
+	bleed: true,
+	bleedIterations: 2,
+	edgePadding: true,
+	duplicatePadding: true,
+	wrapX: ClampToEdge,
+	wrapY: ClampToEdge,
+	alias: true,
+	outputFormat: png,
+	ignoreBlankImages: true,
+	combineSubdirectories: true,
+	flattenPaths: true,
+	useIndexes: true,
+	limitMemory: true,
+}

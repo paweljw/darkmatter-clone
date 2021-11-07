@@ -12,25 +12,22 @@ import net.steamshard.darkmatter.DarkMatter
 import ktx.log.logger
 import ktx.graphics.use
 import net.steamshard.darkmatter.UNIT_SCALE
+import net.steamshard.darkmatter.ecs.component.FacingComponent
 import net.steamshard.darkmatter.ecs.component.GraphicComponent
+import net.steamshard.darkmatter.ecs.component.PlayerComponent
 import net.steamshard.darkmatter.ecs.component.TransformComponent
 
 private val LOG = logger<GameScreen>()
 
 class GameScreen(game: DarkMatter) : BaseScreen(game) {
-    private val playerTexture = Texture(Gdx.files.internal("graphics/ship_base.png"))
     private val player = engine.entity {
         with<TransformComponent> {
-            position.set(0f, 0f, 0f)
+            position.set(5f, 3f, 0f)
         }
 
-        with<GraphicComponent> {
-            sprite.run {
-                setRegion(playerTexture)
-                setSize(texture.width * UNIT_SCALE, texture.height * UNIT_SCALE)
-                setOriginCenter()
-            }
-        }
+        with<GraphicComponent>()
+        with<PlayerComponent>()
+        with<FacingComponent>()
     }
 
     override fun show() {
@@ -42,7 +39,6 @@ class GameScreen(game: DarkMatter) : BaseScreen(game) {
     }
 
     override fun dispose() {
-        playerTexture.dispose()
         game.engine.removeEntity(player)
     }
 }

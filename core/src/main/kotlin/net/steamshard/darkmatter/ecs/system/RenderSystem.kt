@@ -11,7 +11,7 @@ import ktx.log.logger
 import net.steamshard.darkmatter.ecs.component.GraphicComponent
 import net.steamshard.darkmatter.ecs.component.TransformComponent
 
-val LOG = logger<RenderSystem>()
+private val LOG = logger<RenderSystem>()
 
 class RenderSystem(
     private val batch: Batch,

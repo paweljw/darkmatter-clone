@@ -4,11 +4,16 @@ import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.PooledEngine
 import com.badlogic.gdx.Application.LOG_DEBUG
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.utils.viewport.FitViewport
 import ktx.app.KtxGame
 import ktx.log.logger
+import net.steamshard.darkmatter.ecs.system.PlayerAnimationSystem
+import net.steamshard.darkmatter.ecs.system.PlayerInputSystem
 import net.steamshard.darkmatter.ecs.system.RenderSystem
 import net.steamshard.darkmatter.screen.BaseScreen
 import net.steamshard.darkmatter.screen.GameScreen
@@ -21,8 +26,16 @@ class DarkMatter : KtxGame<BaseScreen>() {
     val batch : Batch by lazy { SpriteBatch(1000) }
     val gameViewport = FitViewport(9f, 16f)
 
+    private val graphicsAtlas by lazy { TextureAtlas(Gdx.files.internal("darkmatter.atlas")) }
+
     val engine : Engine by lazy {
         PooledEngine().apply {
+            addSystem(PlayerInputSystem(gameViewport))
+            addSystem(PlayerAnimationSystem(
+                defaultRegion = graphicsAtlas.findRegion("ship_base"),
+                leftRegion = graphicsAtlas.findRegion("ship_left"),
+                rightRegion = graphicsAtlas.findRegion("ship_right"),
+            ))
             addSystem(RenderSystem(batch, gameViewport))
         }
     }
@@ -37,5 +50,6 @@ class DarkMatter : KtxGame<BaseScreen>() {
     override fun dispose() {
         super.dispose()
         batch.dispose()
+        graphicsAtlas.dispose()
     }
 }

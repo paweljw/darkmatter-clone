@@ -35,14 +35,19 @@ class RenderSystem(
         val graphic = entity[GraphicComponent.mapper]
         require(graphic != null) { "Entity |entity| is missing GraphicComponent. entity=$entity" }
 
-        if(graphic.sprite.texture == null) {
-            LOG.error {"Entity |entity| has no texture. entity=$entity"}
+        if (graphic.sprite.texture == null) {
+            LOG.error { "Entity |entity| has no texture. entity=$entity" }
             return
         }
 
         graphic.sprite.run {
             rotation = transform.rotationDeg
-            setBounds(transform.position.x, transform.position.y, transform.size.x, transform.size.y)
+            setBounds(
+                transform.interpolatedPosition.x,
+                transform.interpolatedPosition.y,
+                transform.size.x,
+                transform.size.y
+            )
             draw(batch)
         }
     }

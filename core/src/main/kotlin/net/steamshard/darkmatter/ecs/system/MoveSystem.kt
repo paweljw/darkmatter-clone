@@ -21,14 +21,33 @@ private const val MAX_HOR_SPEED = 5.5f
 
 class MoveSystem :
     IteratingSystem(allOf(TransformComponent::class, MoveComponent::class).exclude(RemoveComponent::class).get()) {
-        private var accumulator = 0f
+    private var accumulator = 0f
 
     override fun update(deltaTime: Float) {
         accumulator += deltaTime
 
-        while(accumulator >= UPDATE_RATE) {
+        while (accumulator >= UPDATE_RATE) {
             accumulator -= UPDATE_RATE
+
+            entities.forEach {
+                it[TransformComponent.mapper]?.let { transform ->
+                    transform.prevPosition.set(transform.position)
+                }
+            }
+
             super.update(UPDATE_RATE)
+        }
+
+        val alpha = accumulator / UPDATE_RATE
+
+        entities.forEach {
+            it[TransformComponent.mapper]?.let { transform ->
+                transform.interpolatedPosition.set(
+                    MathUtils.lerp(transform.prevPosition.x, transform.position.x, alpha),
+                    MathUtils.lerp(transform.prevPosition.y, transform.position.y, alpha),
+                    MathUtils.lerp(transform.prevPosition.z, transform.position.z, alpha)
+                )
+            }
         }
     }
 
@@ -50,8 +69,14 @@ class MoveSystem :
         }
     }
 
-    private fun movePlayer(transform: TransformComponent, move: MoveComponent, player: PlayerComponent, facing: FacingComponent, deltaTime: Float) {
-        move.speed.x = when(facing.direction) {
+    private fun movePlayer(
+        transform: TransformComponent,
+        move: MoveComponent,
+        player: PlayerComponent,
+        facing: FacingComponent,
+        deltaTime: Float
+    ) {
+        move.speed.x = when (facing.direction) {
             FacingDirection.LEFT -> min(0f, move.speed.x - HOR_ACCELERATION * deltaTime)
             FacingDirection.RIGHT -> max(0f, move.speed.x + HOR_ACCELERATION * deltaTime)
             else -> 0f

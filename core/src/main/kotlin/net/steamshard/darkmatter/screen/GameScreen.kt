@@ -13,13 +13,15 @@ import ktx.log.logger
 import ktx.graphics.use
 import net.steamshard.darkmatter.UNIT_SCALE
 import net.steamshard.darkmatter.ecs.component.*
+import kotlin.math.min
 
 private val LOG = logger<GameScreen>()
+private val MAX_DELTA_TIME = 1 / 20f // no less than 20fps
 
 class GameScreen(game: DarkMatter) : BaseScreen(game) {
     private val player = engine.entity {
         with<TransformComponent> {
-            position.set(5f, 3f, 0f)
+            setInitialPosition(4.5f, 8f, 0f)
         }
 
         with<MoveComponent>()
@@ -33,7 +35,7 @@ class GameScreen(game: DarkMatter) : BaseScreen(game) {
     }
 
     override fun render(delta: Float) {
-        engine.update(delta)
+        engine.update(min(delta, MAX_DELTA_TIME))
     }
 
     override fun dispose() {

@@ -11,7 +11,7 @@ import net.steamshard.darkmatter.ecs.component.RemoveComponent
 import net.steamshard.darkmatter.ecs.component.TransformComponent
 import kotlin.math.max
 
-private const val DAMAGE_AREA_HEIGHT = 2f
+const val DAMAGE_AREA_HEIGHT = 2f
 private const val DPS = 25f
 private const val DEATH_EXPLOSION_DURATION = 0.9f
 

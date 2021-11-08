@@ -38,6 +38,7 @@ class DarkMatter : KtxGame<BaseScreen>() {
                 leftRegion = graphicsAtlas.findRegion("ship_left"),
                 rightRegion = graphicsAtlas.findRegion("ship_right"),
             ))
+            addSystem(AnimationSystem(graphicsAtlas))
             addSystem(RenderSystem(batch, gameViewport))
             addSystem(DebugSystem())
             addSystem(RemovalSystem())

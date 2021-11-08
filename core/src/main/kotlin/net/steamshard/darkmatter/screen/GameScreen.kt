@@ -12,7 +12,9 @@ import net.steamshard.darkmatter.DarkMatter
 import ktx.log.logger
 import ktx.graphics.use
 import net.steamshard.darkmatter.UNIT_SCALE
+import net.steamshard.darkmatter.V_WIDTH
 import net.steamshard.darkmatter.ecs.component.*
+import net.steamshard.darkmatter.ecs.system.DAMAGE_AREA_HEIGHT
 import kotlin.math.min
 
 private val LOG = logger<GameScreen>()
@@ -29,6 +31,17 @@ class GameScreen(game: DarkMatter) : BaseScreen(game) {
         with<PlayerComponent>()
         with<FacingComponent>()
     }
+
+    private val darkMatter = engine.entity( {
+        with<TransformComponent> {
+            setInitialPosition(0f, 0f, 0f)
+            size.set(V_WIDTH, DAMAGE_AREA_HEIGHT)
+        }
+        with<GraphicComponent>()
+        with<AnimationComponent> {
+            type = AnimationType.DARK_MATTER
+        }
+    })
 
     override fun show() {
         LOG.debug { "GameScreen shown" }

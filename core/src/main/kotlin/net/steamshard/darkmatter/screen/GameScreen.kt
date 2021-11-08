@@ -1,5 +1,6 @@
 package net.steamshard.darkmatter.screen
 
+import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Texture
@@ -21,9 +22,9 @@ private val LOG = logger<GameScreen>()
 private val MAX_DELTA_TIME = 1 / 20f // no less than 20fps
 
 class GameScreen(game: DarkMatter) : BaseScreen(game) {
-    private val player = engine.entity {
+    private val player: Entity = engine.entity {
         with<TransformComponent> {
-            setInitialPosition(4.5f, 8f, 0f)
+            setInitialPosition(4.5f, 8f, -1f)
         }
 
         with<MoveComponent>()
@@ -32,19 +33,31 @@ class GameScreen(game: DarkMatter) : BaseScreen(game) {
         with<FacingComponent>()
     }
 
-    private val darkMatter = engine.entity( {
-        with<TransformComponent> {
-            setInitialPosition(0f, 0f, 0f)
-            size.set(V_WIDTH, DAMAGE_AREA_HEIGHT)
-        }
-        with<GraphicComponent>()
-        with<AnimationComponent> {
-            type = AnimationType.DARK_MATTER
-        }
-    })
-
     override fun show() {
         LOG.debug { "GameScreen shown" }
+
+        engine.entity {
+            with<TransformComponent>()
+            with<AttachComponent> {
+                entity = player
+                offset.set(0f * UNIT_SCALE, -8f * UNIT_SCALE)
+            }
+            with<GraphicComponent>()
+            with<AnimationComponent> {
+                type = AnimationType.FIRE
+            }
+        }
+
+        engine.entity( {
+            with<TransformComponent> {
+                setInitialPosition(0f, 0f, 0f)
+                size.set(V_WIDTH, DAMAGE_AREA_HEIGHT)
+            }
+            with<GraphicComponent>()
+            with<AnimationComponent> {
+                type = AnimationType.DARK_MATTER
+            }
+        })
     }
 
     override fun render(delta: Float) {

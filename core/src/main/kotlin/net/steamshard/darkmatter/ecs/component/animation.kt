@@ -13,7 +13,8 @@ enum class AnimationType(
     val speedRate: Float = 1f
 ) {
     NONE(""),
-    DARK_MATTER("dark_matter", Animation.PlayMode.LOOP, 1f)
+    DARK_MATTER("dark_matter", Animation.PlayMode.LOOP, 3f),
+    FIRE("fire", Animation.PlayMode.LOOP, 1f)
 }
 
 private const val DEFAULT_FRAME_DURATION = 1 / 20f

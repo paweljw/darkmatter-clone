@@ -1,5 +1,6 @@
 package net.steamshard.darkmatter.ecs.system
 
+import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.SortedIteratingSystem
 import com.badlogic.gdx.graphics.Texture
@@ -16,27 +17,47 @@ import net.steamshard.darkmatter.UNIT_SCALE
 import net.steamshard.darkmatter.V_HEIGHT
 import net.steamshard.darkmatter.V_WIDTH
 import net.steamshard.darkmatter.ecs.component.GraphicComponent
+import net.steamshard.darkmatter.ecs.component.PowerUpType
 import net.steamshard.darkmatter.ecs.component.TransformComponent
+import net.steamshard.darkmatter.event.*
+import kotlin.math.min
 
 private val LOG = logger<RenderSystem>()
+
+private const val BACKGROUND_MIN_SCROLLING_SPEED = -0.25f
 
 class RenderSystem(
     private val batch: Batch,
     private val gameViewport: Viewport,
     private val uiViewport: Viewport,
     private val backgroundTexture: Texture,
+    private val gameEventManager: GameEventManager
 ) : SortedIteratingSystem(
     allOf(GraphicComponent::class, TransformComponent::class).get(),
     compareBy { entity -> entity[TransformComponent.mapper] }
-) {
+), GameEventListener {
     private val background = Sprite(backgroundTexture.apply { setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat) })
-    private val backgroundScrollingSpeed = Vector2(0f, -0.25f)
+    private val backgroundScrollingSpeed = Vector2(0f, BACKGROUND_MIN_SCROLLING_SPEED)
+
+    override fun addedToEngine(engine: Engine?) {
+        super.addedToEngine(engine)
+        gameEventManager.addListener(GameEventType.COLLECT_POWER_UP, this)
+    }
+
+    override fun removedFromEngine(engine: Engine?) {
+        super.removedFromEngine(engine)
+        gameEventManager.removeListener(this)
+    }
 
     override fun update(deltaTime: Float) {
         uiViewport.apply()
         batch.use(uiViewport.camera.combined) {
             // render background
             background.run {
+                backgroundScrollingSpeed.y = min(
+                    BACKGROUND_MIN_SCROLLING_SPEED,
+                    backgroundScrollingSpeed.y + deltaTime * .1f
+                )
                 scroll(backgroundScrollingSpeed.x * deltaTime, backgroundScrollingSpeed.y * deltaTime)
                 draw(it)
             }
@@ -72,6 +93,18 @@ class RenderSystem(
                 transform.size.y
             )
             draw(batch)
+        }
+    }
+
+    override fun onEvent(type: GameEventType, data: GameEvent?) {
+        LOG.debug { "GameEvent $type received" }
+        if(type == GameEventType.COLLECT_POWER_UP) {
+            val eventData = data as GameEventCollectPowerUp
+            if (eventData.type == PowerUpType.SPEED_1) {
+                backgroundScrollingSpeed.y -= 0.25f
+            } else if (eventData.type == PowerUpType.SPEED_2) {
+                backgroundScrollingSpeed.y -= 0.5f
+            }
         }
     }
 }

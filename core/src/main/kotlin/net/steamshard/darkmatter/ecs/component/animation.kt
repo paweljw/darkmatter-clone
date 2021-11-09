@@ -19,6 +19,7 @@ enum class AnimationType(
     SPEED_2("orb_yellow", Animation.PlayMode.LOOP, .3f),
     LIFE("life", Animation.PlayMode.LOOP, .5f),
     SHIELD("shield", Animation.PlayMode.LOOP, .3f),
+    EXPLOSION("explosion", Animation.PlayMode.NORMAL, .3f),
 }
 
 private const val DEFAULT_FRAME_DURATION = 1 / 20f

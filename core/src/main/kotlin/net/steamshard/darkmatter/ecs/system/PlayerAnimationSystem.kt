@@ -6,18 +6,16 @@ import com.badlogic.ashley.core.EntityListener
 import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import ktx.ashley.allOf
+import ktx.ashley.exclude
 import ktx.ashley.get
-import net.steamshard.darkmatter.ecs.component.FacingComponent
-import net.steamshard.darkmatter.ecs.component.FacingDirection
-import net.steamshard.darkmatter.ecs.component.GraphicComponent
-import net.steamshard.darkmatter.ecs.component.PlayerComponent
+import net.steamshard.darkmatter.ecs.component.*
 
 class PlayerAnimationSystem(
     private val defaultRegion: TextureRegion,
     private val leftRegion: TextureRegion,
     private val rightRegion: TextureRegion
 ) : IteratingSystem(
-    allOf(PlayerComponent::class, FacingComponent::class, GraphicComponent::class).get()
+    allOf(PlayerComponent::class, FacingComponent::class, GraphicComponent::class).exclude(RemoveComponent::class).get()
 ), EntityListener {
     override fun addedToEngine(engine: Engine) {
         super.addedToEngine(engine)

@@ -16,25 +16,61 @@ import net.steamshard.darkmatter.UNIT_SCALE
 import net.steamshard.darkmatter.V_WIDTH
 import net.steamshard.darkmatter.ecs.component.*
 import net.steamshard.darkmatter.ecs.system.DAMAGE_AREA_HEIGHT
+import net.steamshard.darkmatter.event.GameEvent
+import net.steamshard.darkmatter.event.GameEventListener
+import net.steamshard.darkmatter.event.GameEventPlayerDeath
+import net.steamshard.darkmatter.event.GameEventType
 import kotlin.math.min
 
 private val LOG = logger<GameScreen>()
 private val MAX_DELTA_TIME = 1 / 20f // no less than 20fps
 
-class GameScreen(game: DarkMatter) : BaseScreen(game) {
-    private val player: Entity = engine.entity {
-        with<TransformComponent> {
-            setInitialPosition(4.5f, 8f, -1f)
-        }
-
-        with<MoveComponent>()
-        with<GraphicComponent>()
-        with<PlayerComponent>()
-        with<FacingComponent>()
-    }
-
+class GameScreen(game: DarkMatter) : BaseScreen(game), GameEventListener {
     override fun show() {
         LOG.debug { "GameScreen shown" }
+
+        game.gameEventManager.addListener(GameEventType.PLAYER_DEATH, this)
+
+        spawnPlayer()
+
+        engine.entity({
+            with<TransformComponent> {
+                setInitialPosition(0f, 0f, 0f)
+                size.set(V_WIDTH, DAMAGE_AREA_HEIGHT)
+            }
+            with<GraphicComponent>()
+            with<AnimationComponent> {
+                type = AnimationType.DARK_MATTER
+            }
+        })
+    }
+
+    override fun hide() {
+        super.hide()
+        game.gameEventManager.removeListener(this)
+    }
+
+    override fun onEvent(type: GameEventType, data: GameEvent?) {
+        if (type == GameEventType.PLAYER_DEATH) {
+            val eventData = data as GameEventPlayerDeath
+
+            LOG.debug { "Player death travelled: ${eventData.distance}" }
+
+            spawnPlayer()
+        }
+    }
+
+    private fun spawnPlayer() {
+        val player = engine.entity {
+            with<TransformComponent> {
+                setInitialPosition(4.5f, 8f, -1f)
+            }
+
+            with<MoveComponent>()
+            with<GraphicComponent>()
+            with<PlayerComponent>()
+            with<FacingComponent>()
+        }
 
         engine.entity {
             with<TransformComponent>()
@@ -47,24 +83,9 @@ class GameScreen(game: DarkMatter) : BaseScreen(game) {
                 type = AnimationType.FIRE
             }
         }
-
-        engine.entity( {
-            with<TransformComponent> {
-                setInitialPosition(0f, 0f, 0f)
-                size.set(V_WIDTH, DAMAGE_AREA_HEIGHT)
-            }
-            with<GraphicComponent>()
-            with<AnimationComponent> {
-                type = AnimationType.DARK_MATTER
-            }
-        })
     }
 
     override fun render(delta: Float) {
         engine.update(min(delta, MAX_DELTA_TIME))
-    }
-
-    override fun dispose() {
-        game.engine.removeEntity(player)
     }
 }

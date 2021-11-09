@@ -7,10 +7,16 @@ import com.badlogic.gdx.math.Rectangle
 import ktx.ashley.*
 import ktx.collections.GdxArray
 import ktx.collections.gdxArrayOf
+import ktx.log.logger
 import net.steamshard.darkmatter.V_HEIGHT
 import net.steamshard.darkmatter.V_WIDTH
 import net.steamshard.darkmatter.ecs.component.*
+import net.steamshard.darkmatter.event.GameEventCollectPowerUp
+import net.steamshard.darkmatter.event.GameEventManager
+import net.steamshard.darkmatter.event.GameEventType
 import kotlin.math.min
+
+private val LOG = logger<PowerUpSystem>()
 
 private const val MAX_SPAWN_INTERVAL = 1.5f
 private const val MIN_SPAWN_INTERVAL = 0.9f
@@ -29,11 +35,13 @@ private class SpawnPattern(
     val types: GdxArray<PowerUpType> = gdxArrayOf(type1, type2, type3, type4, type5)
 )
 
-class PowerUpSystem : IteratingSystem(
+class PowerUpSystem(
+    private val gameEventManager: GameEventManager
+) : IteratingSystem(
     allOf(PowerUpComponent::class, TransformComponent::class).exclude(RemoveComponent::class).get()
 ) {
     private val playerBoundingRect = Rectangle()
-    private val powerupBoundingRect = Rectangle()
+    private val powerUpBoundingRect = Rectangle()
     private val playerEntities by lazy {
         engine.getEntitiesFor(allOf(PlayerComponent::class).exclude(RemoveComponent::class).get())
     }
@@ -50,7 +58,7 @@ class PowerUpSystem : IteratingSystem(
         if (spawnTime <= 0f) {
             spawnTime = MathUtils.random(MIN_SPAWN_INTERVAL, MAX_SPAWN_INTERVAL)
 
-            if(currentSpawnPattern.isEmpty) {
+            if (currentSpawnPattern.isEmpty) {
                 currentSpawnPattern.addAll(spawnPatterns[MathUtils.random(0, 1)].types)
             }
 
@@ -59,38 +67,38 @@ class PowerUpSystem : IteratingSystem(
                 return
             }
 
-            spawnPowerUp(powerUpType, MathUtils.random(0f, V_WIDTH), V_HEIGHT)
+            spawnPowerUp(powerUpType, MathUtils.random(0f, V_WIDTH))
         }
     }
 
-    private fun spawnPowerUp(powerUpType: PowerUpType, x: Float, y: Float) {
-          engine.entity {
-              with<TransformComponent>() {
-                  setInitialPosition(x, y, 0f)
-              }
-              with<GraphicComponent>()
-              with<AnimationComponent> {
-                  type = powerUpType.animationType
-              }
-              with<PowerUpComponent> {
-                  type = powerUpType
-              }
-              with<MoveComponent> {
-                  speed.y = POWER_UP_SPEED
-              }
-          }
+    private fun spawnPowerUp(powerUpType: PowerUpType, x: Float, y: Float = V_HEIGHT) {
+        engine.entity {
+            with<TransformComponent> {
+                setInitialPosition(x, y, 0f)
+            }
+            with<GraphicComponent>()
+            with<AnimationComponent> {
+                type = powerUpType.animationType
+            }
+            with<PowerUpComponent> {
+                type = powerUpType
+            }
+            with<MoveComponent> {
+                speed.y = POWER_UP_SPEED
+            }
+        }
     }
 
     override fun processEntity(entity: Entity, deltaTime: Float) {
         val transform = entity[TransformComponent.mapper]
         require(transform != null) { "Entity |entity| is missing TransformComponent. entity=$entity" }
 
-        if(transform.position.y <= 1f) {
+        if (transform.position.y <= 1f) {
             entity.addComponent<RemoveComponent>(engine)
             return
         }
 
-        powerupBoundingRect.set(
+        powerUpBoundingRect.set(
             transform.position.x,
             transform.position.y,
             transform.size.x,
@@ -105,7 +113,7 @@ class PowerUpSystem : IteratingSystem(
                     playerTransform.size.y,
                 )
 
-                if(playerBoundingRect.overlaps(powerupBoundingRect)) {
+                if (playerBoundingRect.overlaps(powerUpBoundingRect)) {
                     collectPowerUp(playerEntity, entity)
                 }
             }
@@ -116,13 +124,24 @@ class PowerUpSystem : IteratingSystem(
         val powerUpComponent = powerUp[PowerUpComponent.mapper]
         require(powerUpComponent != null) { "Entity |entity| is missing PowerUpComponent. entity=$powerUp" }
 
-        when(powerUpComponent.type) {
-            PowerUpType.SPEED_1 -> player[MoveComponent.mapper]?.let { it.speed.y += BOOST_1_SPEED_GAIN  }
-            PowerUpType.SPEED_2 -> player[MoveComponent.mapper]?.let { it.speed.y += BOOST_2_SPEED_GAIN  }
-            PowerUpType.LIFE -> player[PlayerComponent.mapper]?.let { it.life = min(it.life + LIFE_GAIN, MAX_LIFE)  }
-            PowerUpType.SHIELD -> player[PlayerComponent.mapper]?.let { it.shield = min(it.shield + SHIELD_GAIN, MAX_SHIELD)  }
+        when (powerUpComponent.type) {
+            PowerUpType.SPEED_1 -> player[MoveComponent.mapper]?.let { it.speed.y += BOOST_1_SPEED_GAIN }
+            PowerUpType.SPEED_2 -> player[MoveComponent.mapper]?.let { it.speed.y += BOOST_2_SPEED_GAIN }
+            PowerUpType.LIFE -> player[PlayerComponent.mapper]?.let { it.life = min(it.life + LIFE_GAIN, MAX_LIFE) }
+            PowerUpType.SHIELD -> player[PlayerComponent.mapper]?.let {
+                it.shield = min(it.shield + SHIELD_GAIN, MAX_SHIELD)
+            }
+            else -> LOG.error { "PowerUpComponent without a type in |entity|. entity=$powerUp" }
         }
 
         powerUp.addComponent<RemoveComponent>(engine)
+
+        gameEventManager.dispatchEvent(
+            GameEventType.COLLECT_POWER_UP,
+            GameEventCollectPowerUp.apply {
+                this.player = player
+                type = powerUpComponent.type
+            }
+        )
     }
 }

@@ -4,16 +4,18 @@ import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.EntityListener
 import com.badlogic.ashley.systems.IteratingSystem
-import ktx.ashley.addComponent
-import ktx.ashley.allOf
-import ktx.ashley.get
+import ktx.ashley.*
 import net.steamshard.darkmatter.ecs.component.AttachComponent
 import net.steamshard.darkmatter.ecs.component.GraphicComponent
 import net.steamshard.darkmatter.ecs.component.RemoveComponent
 import net.steamshard.darkmatter.ecs.component.TransformComponent
 
 class AttachSystem : EntityListener,
-    IteratingSystem(allOf(AttachComponent::class, TransformComponent::class, GraphicComponent::class).get()) {
+    IteratingSystem(
+        allOf(AttachComponent::class, TransformComponent::class, GraphicComponent::class).exclude(
+            RemoveComponent::class
+        ).get()
+    ) {
 
     override fun addedToEngine(engine: Engine) {
         super.addedToEngine(engine)
@@ -30,7 +32,7 @@ class AttachSystem : EntityListener,
     override fun entityRemoved(removedEntity: Entity) {
         entities.forEach { entity ->
             entity[AttachComponent.mapper]?.let { attach ->
-                if(attach.entity == removedEntity) {
+                if (attach.entity == removedEntity) {
                     entity.addComponent<RemoveComponent>(engine)
                 }
             }
@@ -46,6 +48,11 @@ class AttachSystem : EntityListener,
 
         val transform = entity[TransformComponent.mapper]
         require(transform != null) { "Entity |entity| is missing TransformComponent. entity=$entity" }
+
+        if (attach.entity.has(RemoveComponent.mapper)) {
+            graphic.sprite.setAlpha(0f)
+            return
+        }
 
         attach.entity[TransformComponent.mapper]?.let { attachTransform ->
             transform.interpolatedPosition.set(

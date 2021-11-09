@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.utils.viewport.FitViewport
 import ktx.app.KtxGame
 import ktx.log.logger
@@ -22,11 +21,16 @@ const val UNIT_SCALE = 1 / 16f
 const val V_WIDTH = 9f
 const val V_HEIGHT = 16f
 
+const val V_WIDTH_PIXELS = 135f
+const val V_HEIGHT_PIXELS = 240f
+
 class DarkMatter : KtxGame<BaseScreen>() {
     val batch : Batch by lazy { SpriteBatch(1000) }
+    val uiViewport = FitViewport(V_WIDTH_PIXELS, V_HEIGHT_PIXELS)
     val gameViewport = FitViewport(V_WIDTH, V_HEIGHT)
 
     private val graphicsAtlas by lazy { TextureAtlas(Gdx.files.internal("darkmatter.atlas")) }
+    private val backgroundTexture by lazy { Texture(Gdx.files.internal("background.png")) }
 
     val engine : Engine by lazy {
         PooledEngine().apply {
@@ -41,7 +45,7 @@ class DarkMatter : KtxGame<BaseScreen>() {
             ))
             addSystem(AttachSystem())
             addSystem(AnimationSystem(graphicsAtlas))
-            addSystem(RenderSystem(batch, gameViewport))
+            addSystem(RenderSystem(batch, gameViewport, uiViewport, backgroundTexture))
             addSystem(DebugSystem())
             addSystem(RemovalSystem())
         }

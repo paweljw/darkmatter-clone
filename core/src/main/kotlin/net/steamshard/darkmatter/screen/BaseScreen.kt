@@ -13,5 +13,6 @@ abstract class BaseScreen(
 
     override fun resize(width: Int, height: Int) {
         game.gameViewport.update(width, height, true)
+        game.uiViewport.update(width, height, true)
     }
 }

@@ -1,57 +1,59 @@
 package net.steamshard.darkmatter.event
 
 import com.badlogic.ashley.core.Entity
+import com.badlogic.gdx.utils.ObjectMap
 import ktx.collections.GdxSet
-import net.steamshard.darkmatter.ecs.component.PowerUpType
-import java.util.*
+import net.steamshard.darkmatter.ecs.component.PowerUp
+import kotlin.reflect.KClass
 
-enum class GameEventType {
-    PLAYER_DEATH,
-    COLLECT_POWER_UP
-}
+// Quite interesting approach with generics:
+// https://github.com/Nerachus/eschenberg/commit/d43b7e6c6eee93746605d673760a46142d55113f
+// later updated to use pooled events:
+// https://github.com/Nerachus/eschenberg/commit/3d8e6806bb615125129627cb71acb4a75a60ca66
 
-interface GameEvent
+sealed class GameEvent {
+    object PlayerDeath : GameEvent() {
+        var distance = 0f
 
-object GameEventPlayerDeath : GameEvent {
-    var distance = 0f
+        override fun toString() = "PlayerDeath(distance=$distance)"
+    }
 
-    override fun toString() = "GameEventPlayerDeath(distance=$distance)"
-}
+    object CollectPowerUp : GameEvent() {
+        lateinit var player: Entity
 
-object GameEventCollectPowerUp : GameEvent {
-    lateinit var player: Entity
+        var type: PowerUp = PowerUp.None
 
-    var type = PowerUpType.NONE
+        override fun toString() = "GameEventCollectPowerUp(type=$type)"
+    }
 
-    override fun toString() = "GameEventCollectPowerUp(type=$type)"
 }
 
 interface GameEventListener {
-    fun onEvent(type: GameEventType, data: GameEvent? = null)
+    fun onEvent(event: GameEvent)
 }
 
 class GameEventManager {
-    private val listeners = EnumMap<GameEventType, GdxSet<GameEventListener>>(GameEventType::class.java)
+    private val listeners = ObjectMap<KClass<out GameEvent>, GdxSet<GameEventListener>>()
 
-    fun dispatchEvent(type: GameEventType, data: GameEvent? = null) {
-        listeners[type]?.forEach { it.onEvent(type, data) }
+    fun dispatchEvent(event: GameEvent) {
+        listeners[event::class]?.forEach { it.onEvent(event) }
     }
 
-    fun addListener(type: GameEventType, listener: GameEventListener) {
+    fun addListener(type: KClass<out GameEvent>, listener: GameEventListener) {
         var eventListeners = listeners[type]
         if (eventListeners == null) {
-            eventListeners = GdxSet<GameEventListener>()
-            listeners[type] = eventListeners
+            eventListeners = GdxSet()
+            listeners.put(type, eventListeners)
         }
 
         eventListeners.add(listener)
     }
 
-    fun removeListener(type: GameEventType, listener: GameEventListener) {
+    fun removeListener(type: KClass<out GameEvent>, listener: GameEventListener) {
         listeners[type]?.remove(listener)
     }
 
     fun removeListener(listener: GameEventListener) {
-        listeners.values. forEach { it.remove(listener) }
+        listeners.values().forEach { it.remove(listener) }
     }
 }

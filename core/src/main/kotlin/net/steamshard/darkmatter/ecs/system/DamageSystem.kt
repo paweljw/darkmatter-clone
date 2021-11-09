@@ -7,9 +7,8 @@ import ktx.ashley.allOf
 import ktx.ashley.exclude
 import ktx.ashley.get
 import net.steamshard.darkmatter.ecs.component.*
+import net.steamshard.darkmatter.event.GameEvent
 import net.steamshard.darkmatter.event.GameEventManager
-import net.steamshard.darkmatter.event.GameEventPlayerDeath
-import net.steamshard.darkmatter.event.GameEventType
 import kotlin.math.max
 
 const val DAMAGE_AREA_HEIGHT = 2f
@@ -53,7 +52,7 @@ class DamageSystem(
                     type = AnimationType.EXPLOSION
                 }
 
-                gameEventManager.dispatchEvent(GameEventType.PLAYER_DEATH, GameEventPlayerDeath.apply {
+                gameEventManager.dispatchEvent(GameEvent.PlayerDeath.apply {
                     distance = player.distance
                 })
             }

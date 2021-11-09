@@ -13,11 +13,8 @@ import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.graphics.use
 import ktx.log.logger
-import net.steamshard.darkmatter.UNIT_SCALE
-import net.steamshard.darkmatter.V_HEIGHT
-import net.steamshard.darkmatter.V_WIDTH
 import net.steamshard.darkmatter.ecs.component.GraphicComponent
-import net.steamshard.darkmatter.ecs.component.PowerUpType
+import net.steamshard.darkmatter.ecs.component.PowerUp
 import net.steamshard.darkmatter.ecs.component.TransformComponent
 import net.steamshard.darkmatter.event.*
 import kotlin.math.min
@@ -41,7 +38,7 @@ class RenderSystem(
 
     override fun addedToEngine(engine: Engine?) {
         super.addedToEngine(engine)
-        gameEventManager.addListener(GameEventType.COLLECT_POWER_UP, this)
+        gameEventManager.addListener(GameEvent.CollectPowerUp::class, this)
     }
 
     override fun removedFromEngine(engine: Engine?) {
@@ -96,15 +93,17 @@ class RenderSystem(
         }
     }
 
-    override fun onEvent(type: GameEventType, data: GameEvent?) {
-        LOG.debug { "GameEvent $type received" }
-        if(type == GameEventType.COLLECT_POWER_UP) {
-            val eventData = data as GameEventCollectPowerUp
-            if (eventData.type == PowerUpType.SPEED_1) {
-                backgroundScrollingSpeed.y -= 0.25f
-            } else if (eventData.type == PowerUpType.SPEED_2) {
-                backgroundScrollingSpeed.y -= 0.5f
+    override fun onEvent(event: GameEvent) {
+        when(event) {
+            is GameEvent.CollectPowerUp -> {
+                when(event.type) {
+                    is PowerUp.Speed1 -> backgroundScrollingSpeed.y -= .25f
+                    is PowerUp.Speed2 -> backgroundScrollingSpeed.y -= .5f
+                    else -> Unit
+                }
             }
+            else -> { LOG.error { "Unsupported event passed in: $event" } }
         }
+
     }
 }

@@ -11,9 +11,8 @@ import ktx.log.logger
 import net.steamshard.darkmatter.V_HEIGHT
 import net.steamshard.darkmatter.V_WIDTH
 import net.steamshard.darkmatter.ecs.component.*
-import net.steamshard.darkmatter.event.GameEventCollectPowerUp
+import net.steamshard.darkmatter.event.GameEvent
 import net.steamshard.darkmatter.event.GameEventManager
-import net.steamshard.darkmatter.event.GameEventType
 import kotlin.math.min
 
 private val LOG = logger<PowerUpSystem>()
@@ -21,18 +20,14 @@ private val LOG = logger<PowerUpSystem>()
 private const val MAX_SPAWN_INTERVAL = 1.5f
 private const val MIN_SPAWN_INTERVAL = 0.9f
 private const val POWER_UP_SPEED = -4.75f
-private const val BOOST_1_SPEED_GAIN = 3f
-private const val BOOST_2_SPEED_GAIN = 3.75f
-private const val LIFE_GAIN = 25f
-private const val SHIELD_GAIN = 25f
 
 private class SpawnPattern(
-    type1: PowerUpType = PowerUpType.NONE,
-    type2: PowerUpType = PowerUpType.NONE,
-    type3: PowerUpType = PowerUpType.NONE,
-    type4: PowerUpType = PowerUpType.NONE,
-    type5: PowerUpType = PowerUpType.NONE,
-    val types: GdxArray<PowerUpType> = gdxArrayOf(type1, type2, type3, type4, type5)
+    type1: PowerUp = PowerUp.None,
+    type2: PowerUp = PowerUp.None,
+    type3: PowerUp = PowerUp.None,
+    type4: PowerUp = PowerUp.None,
+    type5: PowerUp = PowerUp.None,
+    val types: GdxArray<PowerUp> = gdxArrayOf(type1, type2, type3, type4, type5)
 )
 
 class PowerUpSystem(
@@ -47,10 +42,10 @@ class PowerUpSystem(
     }
     private var spawnTime = 0f
     private val spawnPatterns = gdxArrayOf(
-        SpawnPattern(type1 = PowerUpType.SPEED_1, type2 = PowerUpType.SPEED_2, type5 = PowerUpType.LIFE),
-        SpawnPattern(type2 = PowerUpType.LIFE, type3 = PowerUpType.SHIELD, type4 = PowerUpType.SPEED_2)
+        SpawnPattern(type1 = PowerUp.Speed1, type2 = PowerUp.Speed2, type5 = PowerUp.Life),
+        SpawnPattern(type2 = PowerUp.Life, type3 = PowerUp.Shield, type4 = PowerUp.Speed2)
     )
-    private val currentSpawnPattern = GdxArray<PowerUpType>()
+    private val currentSpawnPattern = GdxArray<PowerUp>()
 
     override fun update(deltaTime: Float) {
         super.update(deltaTime)
@@ -63,7 +58,7 @@ class PowerUpSystem(
             }
 
             val powerUpType = currentSpawnPattern.removeIndex(0)
-            if (powerUpType == PowerUpType.NONE) {
+            if (powerUpType == PowerUp.None) {
                 return
             }
 
@@ -71,17 +66,17 @@ class PowerUpSystem(
         }
     }
 
-    private fun spawnPowerUp(powerUpType: PowerUpType, x: Float, y: Float = V_HEIGHT) {
+    private fun spawnPowerUp(powerUp: PowerUp, x: Float, y: Float = V_HEIGHT) {
         engine.entity {
             with<TransformComponent> {
                 setInitialPosition(x, y, 0f)
             }
             with<GraphicComponent>()
             with<AnimationComponent> {
-                type = powerUpType.animationType
+                type = powerUp.animationType
             }
             with<PowerUpComponent> {
-                type = powerUpType
+                type = powerUp
             }
             with<MoveComponent> {
                 speed.y = POWER_UP_SPEED
@@ -124,23 +119,19 @@ class PowerUpSystem(
         val powerUpComponent = powerUp[PowerUpComponent.mapper]
         require(powerUpComponent != null) { "Entity |entity| is missing PowerUpComponent. entity=$powerUp" }
 
-        when (powerUpComponent.type) {
-            PowerUpType.SPEED_1 -> player[MoveComponent.mapper]?.let { it.speed.y += BOOST_1_SPEED_GAIN }
-            PowerUpType.SPEED_2 -> player[MoveComponent.mapper]?.let { it.speed.y += BOOST_2_SPEED_GAIN }
-            PowerUpType.LIFE -> player[PlayerComponent.mapper]?.let { it.life = min(it.life + LIFE_GAIN, MAX_LIFE) }
-            PowerUpType.SHIELD -> player[PlayerComponent.mapper]?.let {
-                it.shield = min(it.shield + SHIELD_GAIN, MAX_SHIELD)
-            }
-            else -> LOG.error { "PowerUpComponent without a type in |entity|. entity=$powerUp" }
+        if(powerUpComponent.type is PowerUp.None) {
+            LOG.error { "PowerUpComponent without a type in |entity|. entity=$powerUp" }
+            return
         }
+
+        powerUpComponent.type.applyEffect(player)
 
         powerUp.addComponent<RemoveComponent>(engine)
 
         gameEventManager.dispatchEvent(
-            GameEventType.COLLECT_POWER_UP,
-            GameEventCollectPowerUp.apply {
+            GameEvent.CollectPowerUp.apply {
                 this.player = player
-                type = powerUpComponent.type
+                this.type = powerUpComponent.type
             }
         )
     }

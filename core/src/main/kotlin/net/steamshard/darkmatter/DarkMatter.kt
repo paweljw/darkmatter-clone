@@ -32,6 +32,7 @@ class DarkMatter : KtxGame<BaseScreen>() {
         PooledEngine().apply {
             addSystem(PlayerInputSystem(gameViewport))
             addSystem(MoveSystem())
+            addSystem(PowerUpSystem())
             addSystem(DamageSystem())
             addSystem(PlayerAnimationSystem(
                 defaultRegion = graphicsAtlas.findRegion("ship_base"),

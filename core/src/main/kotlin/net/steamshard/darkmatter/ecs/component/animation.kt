@@ -3,9 +3,9 @@ package net.steamshard.darkmatter.ecs.component
 import com.badlogic.ashley.core.Component
 import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.utils.Array
 import com.badlogic.gdx.utils.Pool
 import ktx.ashley.mapperFor
+import ktx.collections.GdxArray
 
 enum class AnimationType(
     val atlasKey: String,
@@ -14,14 +14,18 @@ enum class AnimationType(
 ) {
     NONE(""),
     DARK_MATTER("dark_matter", Animation.PlayMode.LOOP, 3f),
-    FIRE("fire", Animation.PlayMode.LOOP, 1f)
+    FIRE("fire", Animation.PlayMode.LOOP, 1f),
+    SPEED_1("orb_blue", Animation.PlayMode.LOOP, .3f),
+    SPEED_2("orb_yellow", Animation.PlayMode.LOOP, .3f),
+    LIFE("life", Animation.PlayMode.LOOP, .5f),
+    SHIELD("shield", Animation.PlayMode.LOOP, .3f),
 }
 
 private const val DEFAULT_FRAME_DURATION = 1 / 20f
 
 class Animation2D(
     val type: AnimationType,
-    keyFrames: Array<out TextureRegion>,
+    keyFrames: GdxArray<out TextureRegion>,
     playMode: PlayMode = PlayMode.LOOP,
     speedRate: Float = 1f
 ) : Animation<TextureRegion>(DEFAULT_FRAME_DURATION / speedRate, keyFrames, playMode)

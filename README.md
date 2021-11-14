@@ -1,4 +1,8 @@
-# DarkMatter
+# DarkMatter (Clone)
+
+Based on a tutorial series by @Quillraven on https://www.youtube.com/watch?v=25_xCStxi9g&list=PLTKHCDn5RKK-8lZmjZoG4rFywN_SLbZR8&index=25. Check it out, it rocks the proverbial socks.
+
+## Other stuff
 
 A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/tommyettinger/gdx-liftoff).
 

@@ -21,7 +21,13 @@ private val LOG = logger<GameScreen>()
 private const val MAX_DELTA_TIME = 1 / 20f // no less than 20fps
 
 class GameScreen(game: DarkMatter, private val engine: Engine = game.engine) : BaseScreen(game), GameEventListener {
+    private var isGameOver = false
+    private var gameOverCountdown = 1f
+
     override fun show() {
+        isGameOver = false
+        gameOverCountdown = 1f
+
         LOG.debug { "GameScreen shown" }
 
         game.gameEventManager.addListener(GameEvent.PlayerDeath::class, this)
@@ -51,12 +57,13 @@ class GameScreen(game: DarkMatter, private val engine: Engine = game.engine) : B
         is GameEvent.PlayerDeath -> {
             LOG.debug { "Player death travelled: ${event.distance}" }
 
-            game.preferences["highscore"] = max(game.preferences.get<Float>("highscore", 0f), event.distance)
+            game.preferences["lastScore"] = event.distance
+            game.preferences["highScore"] = max(game.preferences.get<Float>("highScore", 0f), event.distance)
             game.preferences.flush()
 
-            LOG.debug { "Current high score: ${game.preferences.get<Float>("highscore")}" }
+            LOG.debug { "Current high score: ${game.preferences.get<Float>("highScore")}" }
 
-            spawnPlayer()
+            isGameOver = true
         }
         else -> {
             LOG.error { "Unsupported event $event" }
@@ -90,5 +97,12 @@ class GameScreen(game: DarkMatter, private val engine: Engine = game.engine) : B
 
     override fun render(delta: Float) {
         engine.update(min(delta, MAX_DELTA_TIME))
+
+        if(isGameOver) {
+            gameOverCountdown -= delta
+            if(gameOverCountdown <= 0f) {
+                game.setScreen<GameOverScreen>()
+            }
+        }
     }
 }

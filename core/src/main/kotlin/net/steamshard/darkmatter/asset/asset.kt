@@ -3,10 +3,12 @@
 package net.steamshard.darkmatter.asset
 
 import com.badlogic.gdx.assets.AssetDescriptor
+import com.badlogic.gdx.assets.loaders.BitmapFontLoader
 import com.badlogic.gdx.assets.loaders.ShaderProgramLoader
 import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 
@@ -15,15 +17,17 @@ enum class TextureAsset(
     directory: String = "graphics",
     val descriptor: AssetDescriptor<Texture> = AssetDescriptor("$directory/$fileName", Texture::class.java)
 ) {
-    BACKGROUND("background.png")
+    BACKGROUND("background.png"),
 }
 
 enum class TextureAtlasAsset(
     fileName: String,
     directory: String = "graphics",
-    val descriptor: AssetDescriptor<TextureAtlas> = AssetDescriptor("$directory/$fileName", TextureAtlas::class.java)
+    val descriptor: AssetDescriptor<TextureAtlas> = AssetDescriptor("$directory/$fileName", TextureAtlas::class.java),
+    var isSkinAtlas: Boolean = false
 ) {
-    GAME_GRAPHICS("darkmatter.atlas")
+    GAME_GRAPHICS("darkmatter.atlas"),
+    SKIN("ui.atlas", "ui", isSkinAtlas = true)
 }
 
 enum class SoundAsset(
@@ -47,7 +51,7 @@ enum class MusicAsset(
     val descriptor: AssetDescriptor<Music> = AssetDescriptor("$directory/$fileName", Music::class.java)
 ) {
     GAME("game.mp3"),
-    GAME_OVER("game_over.mp3"),
+    GAME_OVER("gameOver.mp3"),
     MENU("menu.mp3"),
 }
 
@@ -65,4 +69,20 @@ enum class ShaderProgramAsset(
     )
 ) {
     OUTLINE("default.vert", "outline.frag")
+}
+
+// Font creation app: Hiero
+enum class BitmapFontAsset(
+    fileName: String,
+    directory: String = "fonts",
+    val descriptor: AssetDescriptor<BitmapFont> = AssetDescriptor(
+        "$directory/$fileName",
+        BitmapFont::class.java,
+        BitmapFontLoader.BitmapFontParameter().apply {
+            atlasName = TextureAtlasAsset.SKIN.descriptor.fileName
+        }
+    )
+) {
+    FONT_LARGE_GRADIENT("font11_gradient.fnt"),
+    FONT_DEFAULT("font8.fnt")
 }

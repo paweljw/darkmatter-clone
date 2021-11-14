@@ -9,10 +9,14 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.FitViewport
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import ktx.app.KtxGame
 import ktx.assets.async.AssetStorage
 import ktx.async.KtxAsync
+import ktx.collections.gdxArrayOf
 import ktx.log.logger
+import net.steamshard.darkmatter.asset.BitmapFontAsset
 import net.steamshard.darkmatter.asset.ShaderProgramAsset
 import net.steamshard.darkmatter.asset.TextureAsset
 import net.steamshard.darkmatter.asset.TextureAtlasAsset
@@ -22,6 +26,7 @@ import net.steamshard.darkmatter.ecs.system.*
 import net.steamshard.darkmatter.event.GameEventManager
 import net.steamshard.darkmatter.screen.BaseScreen
 import net.steamshard.darkmatter.screen.LoadingScreen
+import net.steamshard.darkmatter.ui.createSkin
 
 private val LOG = logger<DarkMatter>()
 
@@ -84,8 +89,19 @@ class DarkMatter : KtxGame<BaseScreen>() {
         Gdx.app.logLevel = LOG_DEBUG
         LOG.debug { "Create game instance" }
 
-        addScreen(LoadingScreen(this))
-        setScreen<LoadingScreen>()
+        val assetRefs = gdxArrayOf(
+            TextureAtlasAsset.values().filter { it.isSkinAtlas }.map { assets.loadAsync(it.descriptor) },
+            BitmapFontAsset.values().map { assets.loadAsync(it.descriptor) }
+        ).flatten()
+
+        KtxAsync.launch {
+            assetRefs.joinAll()
+
+            createSkin(assets)
+
+            addScreen(LoadingScreen(this@DarkMatter))
+            setScreen<LoadingScreen>()
+        }
     }
 
     override fun render() {

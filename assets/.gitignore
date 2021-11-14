@@ -2,4 +2,6 @@
 !.gitignore
 !background.png
 !music
+!music/*
 !sound
+!sound/*

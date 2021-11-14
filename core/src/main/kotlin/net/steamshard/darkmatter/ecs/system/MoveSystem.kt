@@ -9,6 +9,7 @@ import ktx.ashley.get
 import net.steamshard.darkmatter.V_HEIGHT
 import net.steamshard.darkmatter.V_WIDTH
 import net.steamshard.darkmatter.ecs.component.*
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -90,7 +91,9 @@ class MoveSystem :
             MAX_VER_POS_PLAYER_SPEED
         )
 
+        val oldY = transform.position.y
         moveEntity(transform, move, deltaTime)
+        player.distance += abs(transform.position.y - oldY)
     }
 
     private fun moveEntity(transform: TransformComponent, move: MoveComponent, deltaTime: Float) {

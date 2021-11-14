@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.PooledEngine
 import com.badlogic.gdx.Application.LOG_DEBUG
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Preferences
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.viewport.FitViewport
@@ -39,6 +40,7 @@ class DarkMatter : KtxGame<BaseScreen>() {
         AssetStorage()
     }
     val audioService: AudioService by lazy { DefaultAudioService(assets) }
+    val preferences: Preferences by lazy { Gdx.app.getPreferences("dark-matter") }
 
     val engine : Engine by lazy {
         PooledEngine().apply {

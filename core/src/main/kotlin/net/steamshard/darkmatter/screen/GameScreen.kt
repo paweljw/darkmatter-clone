@@ -5,6 +5,8 @@ import ktx.ashley.entity
 import ktx.ashley.with
 import net.steamshard.darkmatter.DarkMatter
 import ktx.log.logger
+import ktx.preferences.get
+import ktx.preferences.set
 import net.steamshard.darkmatter.UNIT_SCALE
 import net.steamshard.darkmatter.V_WIDTH
 import net.steamshard.darkmatter.asset.MusicAsset
@@ -12,6 +14,7 @@ import net.steamshard.darkmatter.ecs.component.*
 import net.steamshard.darkmatter.ecs.system.DAMAGE_AREA_HEIGHT
 import net.steamshard.darkmatter.event.GameEvent
 import net.steamshard.darkmatter.event.GameEventListener
+import kotlin.math.max
 import kotlin.math.min
 
 private val LOG = logger<GameScreen>()
@@ -44,16 +47,19 @@ class GameScreen(game: DarkMatter, private val engine: Engine = game.engine) : B
         game.gameEventManager.removeListener(this)
     }
 
-    override fun onEvent(event: GameEvent) {
-        when (event) {
-            is GameEvent.PlayerDeath -> {
-                LOG.debug { "Player death travelled: ${event.distance}" }
+    override fun onEvent(event: GameEvent) = when (event) {
+        is GameEvent.PlayerDeath -> {
+            LOG.debug { "Player death travelled: ${event.distance}" }
 
-                spawnPlayer()
-            }
-            else -> {
-                LOG.error { "Unsupported event $event" }
-            }
+            game.preferences["highscore"] = max(game.preferences.get<Float>("highscore", 0f), event.distance)
+            game.preferences.flush()
+
+            LOG.debug { "Current high score: ${game.preferences.get<Float>("highscore")}" }
+
+            spawnPlayer()
+        }
+        else -> {
+            LOG.error { "Unsupported event $event" }
         }
     }
 

@@ -7,6 +7,7 @@ import net.steamshard.darkmatter.DarkMatter
 import ktx.log.logger
 import net.steamshard.darkmatter.UNIT_SCALE
 import net.steamshard.darkmatter.V_WIDTH
+import net.steamshard.darkmatter.asset.MusicAsset
 import net.steamshard.darkmatter.ecs.component.*
 import net.steamshard.darkmatter.ecs.system.DAMAGE_AREA_HEIGHT
 import net.steamshard.darkmatter.event.GameEvent
@@ -23,6 +24,8 @@ class GameScreen(game: DarkMatter, private val engine: Engine = game.engine) : B
         game.gameEventManager.addListener(GameEvent.PlayerDeath::class, this)
 
         spawnPlayer()
+
+        game.audioService.play(MusicAsset.GAME)
 
         engine.entity {
             with<TransformComponent> {

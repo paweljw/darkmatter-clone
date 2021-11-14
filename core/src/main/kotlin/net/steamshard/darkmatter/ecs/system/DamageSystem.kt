@@ -6,6 +6,8 @@ import ktx.ashley.addComponent
 import ktx.ashley.allOf
 import ktx.ashley.exclude
 import ktx.ashley.get
+import net.steamshard.darkmatter.asset.SoundAsset
+import net.steamshard.darkmatter.audio.AudioService
 import net.steamshard.darkmatter.ecs.component.*
 import net.steamshard.darkmatter.event.GameEvent
 import net.steamshard.darkmatter.event.GameEventManager
@@ -16,7 +18,8 @@ private const val DPS = 25f
 private const val DEATH_EXPLOSION_DURATION = 0.9f
 
 class DamageSystem(
-    private val gameEventManager: GameEventManager
+    private val gameEventManager: GameEventManager,
+    private val audioService: AudioService
 ) :
     IteratingSystem(allOf(PlayerComponent::class, TransformComponent::class).exclude(RemoveComponent::class).get()) {
 
@@ -34,6 +37,7 @@ class DamageSystem(
                 val blockAmount = player.shield
                 player.shield = max(0f, player.shield - damage)
                 damage -= blockAmount
+                audioService.play(SoundAsset.BLOCK)
 
                 if (damage <= 0f) {
                     return
@@ -46,6 +50,7 @@ class DamageSystem(
                 life = player.life
                 maxLife = player.maxLife
             })
+            audioService.play(SoundAsset.DAMAGE)
 
             if(player.life <= 0) {
                 entity.addComponent<RemoveComponent>(engine) {
@@ -60,6 +65,8 @@ class DamageSystem(
                 gameEventManager.dispatchEvent(GameEvent.PlayerDeath.apply {
                     distance = player.distance
                 })
+
+                audioService.play(SoundAsset.EXPLOSION)
             }
         }
     }

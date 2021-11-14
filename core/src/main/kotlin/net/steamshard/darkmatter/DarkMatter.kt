@@ -15,6 +15,8 @@ import ktx.async.KtxAsync
 import ktx.log.logger
 import net.steamshard.darkmatter.asset.TextureAsset
 import net.steamshard.darkmatter.asset.TextureAtlasAsset
+import net.steamshard.darkmatter.audio.AudioService
+import net.steamshard.darkmatter.audio.DefaultAudioService
 import net.steamshard.darkmatter.ecs.system.*
 import net.steamshard.darkmatter.event.GameEventManager
 import net.steamshard.darkmatter.screen.BaseScreen
@@ -39,6 +41,7 @@ class DarkMatter : KtxGame<BaseScreen>() {
         KtxAsync.initiate()
         AssetStorage()
     }
+    val audioService: AudioService by lazy { DefaultAudioService(assets) }
 
     val engine : Engine by lazy {
         PooledEngine().apply {
@@ -47,8 +50,8 @@ class DarkMatter : KtxGame<BaseScreen>() {
 
             addSystem(PlayerInputSystem(gameViewport))
             addSystem(MoveSystem())
-            addSystem(PowerUpSystem(gameEventManager))
-            addSystem(DamageSystem(gameEventManager))
+            addSystem(PowerUpSystem(gameEventManager, audioService))
+            addSystem(DamageSystem(gameEventManager, audioService))
             addSystem(CameraShakeSystem(gameViewport.camera, gameEventManager))
             addSystem(PlayerAnimationSystem(
                 defaultRegion = atlas.findRegion("ship_base"),
@@ -70,6 +73,11 @@ class DarkMatter : KtxGame<BaseScreen>() {
 
         addScreen(LoadingScreen(this))
         setScreen<LoadingScreen>()
+    }
+
+    override fun render() {
+        super.render()
+        audioService.update()
     }
 
     override fun dispose() {

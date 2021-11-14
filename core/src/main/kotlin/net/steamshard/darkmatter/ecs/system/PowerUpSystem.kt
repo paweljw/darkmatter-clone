@@ -10,6 +10,7 @@ import ktx.collections.gdxArrayOf
 import ktx.log.logger
 import net.steamshard.darkmatter.V_HEIGHT
 import net.steamshard.darkmatter.V_WIDTH
+import net.steamshard.darkmatter.audio.AudioService
 import net.steamshard.darkmatter.ecs.component.*
 import net.steamshard.darkmatter.event.GameEvent
 import net.steamshard.darkmatter.event.GameEventManager
@@ -31,7 +32,8 @@ private class SpawnPattern(
 )
 
 class PowerUpSystem(
-    private val gameEventManager: GameEventManager
+    private val gameEventManager: GameEventManager,
+    private val audioService: AudioService
 ) : IteratingSystem(
     allOf(PowerUpComponent::class, TransformComponent::class).exclude(RemoveComponent::class).get()
 ) {
@@ -125,6 +127,7 @@ class PowerUpSystem(
         }
 
         powerUpComponent.type.applyEffect(player)
+        powerUpComponent.type.playSound(audioService)
 
         powerUp.addComponent<RemoveComponent>(engine)
 

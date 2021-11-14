@@ -10,11 +10,16 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.utils.viewport.FitViewport
 import ktx.app.KtxGame
+import ktx.assets.async.AssetStorage
+import ktx.async.KtxAsync
 import ktx.log.logger
+import net.steamshard.darkmatter.asset.TextureAsset
+import net.steamshard.darkmatter.asset.TextureAtlasAsset
 import net.steamshard.darkmatter.ecs.system.*
 import net.steamshard.darkmatter.event.GameEventManager
 import net.steamshard.darkmatter.screen.BaseScreen
 import net.steamshard.darkmatter.screen.GameScreen
+import net.steamshard.darkmatter.screen.LoadingScreen
 
 private val LOG = logger<DarkMatter>()
 
@@ -30,24 +35,28 @@ class DarkMatter : KtxGame<BaseScreen>() {
     val uiViewport = FitViewport(V_WIDTH_PIXELS, V_HEIGHT_PIXELS)
     val gameViewport = FitViewport(V_WIDTH, V_HEIGHT)
     val gameEventManager = GameEventManager()
-
-    private val graphicsAtlas by lazy { TextureAtlas(Gdx.files.internal("darkmatter.atlas")) }
-    private val backgroundTexture by lazy { Texture(Gdx.files.internal("background.png")) }
+    val assets : AssetStorage by lazy {
+        KtxAsync.initiate()
+        AssetStorage()
+    }
 
     val engine : Engine by lazy {
         PooledEngine().apply {
+            val atlas = assets[TextureAtlasAsset.GAME_GRAPHICS.descriptor]
+            val backgroundTexture = assets[TextureAsset.BACKGROUDND.descriptor]
+
             addSystem(PlayerInputSystem(gameViewport))
             addSystem(MoveSystem())
             addSystem(PowerUpSystem(gameEventManager))
             addSystem(DamageSystem(gameEventManager))
             addSystem(CameraShakeSystem(gameViewport.camera, gameEventManager))
             addSystem(PlayerAnimationSystem(
-                defaultRegion = graphicsAtlas.findRegion("ship_base"),
-                leftRegion = graphicsAtlas.findRegion("ship_left"),
-                rightRegion = graphicsAtlas.findRegion("ship_right"),
+                defaultRegion = atlas.findRegion("ship_base"),
+                leftRegion = atlas.findRegion("ship_left"),
+                rightRegion = atlas.findRegion("ship_right"),
             ))
             addSystem(AttachSystem())
-            addSystem(AnimationSystem(graphicsAtlas))
+            addSystem(AnimationSystem(atlas))
             addSystem(RenderSystem(batch, gameViewport, uiViewport, backgroundTexture, gameEventManager))
             addSystem(DebugSystem())
             addSystem(RemovalSystem())
@@ -56,14 +65,15 @@ class DarkMatter : KtxGame<BaseScreen>() {
 
     override fun create() {
         Gdx.app.logLevel = LOG_DEBUG
-        addScreen(GameScreen(this))
         LOG.debug { "Create game instance" }
-        setScreen<GameScreen>()
+
+        addScreen(LoadingScreen(this))
+        setScreen<LoadingScreen>()
     }
 
     override fun dispose() {
         super.dispose()
         batch.dispose()
-        graphicsAtlas.dispose()
+        assets.dispose()
     }
 }

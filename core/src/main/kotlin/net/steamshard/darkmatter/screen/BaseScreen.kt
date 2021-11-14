@@ -7,8 +7,6 @@ import net.steamshard.darkmatter.DarkMatter
 
 abstract class BaseScreen(
     val game: DarkMatter,
-    val batch: Batch = game.batch,
-    val engine: Engine = game.engine
 ) : KtxScreen {
 
     override fun resize(width: Int, height: Int) {

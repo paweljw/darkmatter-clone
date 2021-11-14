@@ -1,5 +1,6 @@
 package net.steamshard.darkmatter.screen
 
+import com.badlogic.ashley.core.Engine
 import ktx.ashley.entity
 import ktx.ashley.with
 import net.steamshard.darkmatter.DarkMatter
@@ -15,7 +16,7 @@ import kotlin.math.min
 private val LOG = logger<GameScreen>()
 private const val MAX_DELTA_TIME = 1 / 20f // no less than 20fps
 
-class GameScreen(game: DarkMatter) : BaseScreen(game), GameEventListener {
+class GameScreen(game: DarkMatter, private val engine: Engine = game.engine) : BaseScreen(game), GameEventListener {
     override fun show() {
         LOG.debug { "GameScreen shown" }
 

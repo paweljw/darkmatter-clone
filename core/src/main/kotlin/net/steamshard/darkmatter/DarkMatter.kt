@@ -12,6 +12,7 @@ import ktx.app.KtxGame
 import ktx.assets.async.AssetStorage
 import ktx.async.KtxAsync
 import ktx.log.logger
+import net.steamshard.darkmatter.asset.ShaderProgramAsset
 import net.steamshard.darkmatter.asset.TextureAsset
 import net.steamshard.darkmatter.asset.TextureAtlasAsset
 import net.steamshard.darkmatter.audio.AudioService
@@ -60,7 +61,14 @@ class DarkMatter : KtxGame<BaseScreen>() {
             ))
             addSystem(AttachSystem())
             addSystem(AnimationSystem(atlas))
-            addSystem(RenderSystem(batch, gameViewport, uiViewport, backgroundTexture, gameEventManager))
+            addSystem(RenderSystem(
+                batch,
+                gameViewport,
+                uiViewport,
+                backgroundTexture,
+                gameEventManager,
+                outlineShader = assets[ShaderProgramAsset.OUTLINE.descriptor]
+            ))
             addSystem(DebugSystem())
             addSystem(RemovalSystem())
         }

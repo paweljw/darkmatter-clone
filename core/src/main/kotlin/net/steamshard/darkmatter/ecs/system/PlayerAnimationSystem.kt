@@ -9,11 +9,14 @@ import ktx.ashley.allOf
 import ktx.ashley.exclude
 import ktx.ashley.get
 import net.steamshard.darkmatter.ecs.component.*
+import net.steamshard.darkmatter.event.GameEvent
+import net.steamshard.darkmatter.event.GameEventManager
 
 class PlayerAnimationSystem(
     private val defaultRegion: TextureRegion,
     private val leftRegion: TextureRegion,
-    private val rightRegion: TextureRegion
+    private val rightRegion: TextureRegion,
+    private val gameEventManager: GameEventManager
 ) : IteratingSystem(
     allOf(PlayerComponent::class, FacingComponent::class, GraphicComponent::class).exclude(RemoveComponent::class).get()
 ), EntityListener {
@@ -46,6 +49,8 @@ class PlayerAnimationSystem(
         }
 
         graphic.setSpriteRegion(region)
+
+        gameEventManager.dispatchEvent(GameEvent.DirectionChange.apply { direction = facing.direction })
     }
 
     override fun entityAdded(entity: Entity) {

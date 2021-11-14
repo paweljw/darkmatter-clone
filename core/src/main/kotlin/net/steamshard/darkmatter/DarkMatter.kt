@@ -54,6 +54,7 @@ class DarkMatter : KtxGame<BaseScreen>() {
                 defaultRegion = atlas.findRegion("ship_base"),
                 leftRegion = atlas.findRegion("ship_left"),
                 rightRegion = atlas.findRegion("ship_right"),
+                gameEventManager
             ))
             addSystem(AttachSystem())
             addSystem(AnimationSystem(atlas))

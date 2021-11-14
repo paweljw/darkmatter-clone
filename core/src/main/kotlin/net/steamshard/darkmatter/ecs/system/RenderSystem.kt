@@ -13,6 +13,7 @@ import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.graphics.use
 import ktx.log.logger
+import net.steamshard.darkmatter.ecs.component.FacingDirection
 import net.steamshard.darkmatter.ecs.component.GraphicComponent
 import net.steamshard.darkmatter.ecs.component.PowerUp
 import net.steamshard.darkmatter.ecs.component.TransformComponent
@@ -28,17 +29,18 @@ class RenderSystem(
     private val gameViewport: Viewport,
     private val uiViewport: Viewport,
     private val backgroundTexture: Texture,
-    private val gameEventManager: GameEventManager
+    private val gameEventManager: GameEventManager,
+    private val background: Sprite = Sprite(backgroundTexture.apply { setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat) })
 ) : SortedIteratingSystem(
     allOf(GraphicComponent::class, TransformComponent::class).get(),
     compareBy { entity -> entity[TransformComponent.mapper] }
 ), GameEventListener {
-    private val background = Sprite(backgroundTexture.apply { setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat) })
     private val backgroundScrollingSpeed = Vector2(0f, BACKGROUND_MIN_SCROLLING_SPEED)
 
     override fun addedToEngine(engine: Engine?) {
         super.addedToEngine(engine)
         gameEventManager.addListener(GameEvent.CollectPowerUp::class, this)
+        gameEventManager.addListener(GameEvent.DirectionChange::class, this)
     }
 
     override fun removedFromEngine(engine: Engine?) {
@@ -100,6 +102,13 @@ class RenderSystem(
                     is PowerUp.Speed1 -> backgroundScrollingSpeed.y -= .25f
                     is PowerUp.Speed2 -> backgroundScrollingSpeed.y -= .5f
                     else -> Unit
+                }
+            }
+            is GameEvent.DirectionChange -> {
+                when(event.direction) {
+                    FacingDirection.LEFT -> backgroundScrollingSpeed.x = -.5f
+                    FacingDirection.RIGHT -> backgroundScrollingSpeed.x = .5f
+                    FacingDirection.DEFAULT -> backgroundScrollingSpeed.x = 0f
                 }
             }
             else -> { LOG.error { "Unsupported event passed in: $event" } }

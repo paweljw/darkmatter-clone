@@ -3,6 +3,7 @@ package net.steamshard.darkmatter.event
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.utils.ObjectMap
 import ktx.collections.GdxSet
+import net.steamshard.darkmatter.ecs.component.FacingDirection
 import net.steamshard.darkmatter.ecs.component.PowerUp
 import kotlin.reflect.KClass
 
@@ -32,6 +33,12 @@ sealed class GameEvent {
         var maxLife = 0f
 
         override fun toString() = "PlayerHit(player=$player, life=$life, maxLife=$maxLife)"
+    }
+
+    object DirectionChange : GameEvent() {
+        lateinit var direction: FacingDirection
+
+        override fun toString() = "DirectionChange(direction=$direction)"
     }
 }
 

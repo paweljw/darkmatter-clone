@@ -7,7 +7,6 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.ashley.allOf
 import ktx.ashley.get
-import ktx.log.logger
 import net.steamshard.darkmatter.ecs.component.FacingComponent
 import net.steamshard.darkmatter.ecs.component.FacingDirection
 import net.steamshard.darkmatter.ecs.component.PlayerComponent

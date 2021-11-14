@@ -11,7 +11,7 @@ class PlayerComponent : Component, Pool.Poolable {
     var life = MAX_LIFE
     var maxLife = MAX_LIFE
     var shield = 0f
-    var maxShield = MAX_SHIELD
+    private var maxShield = MAX_SHIELD
     var distance = 0f
 
 

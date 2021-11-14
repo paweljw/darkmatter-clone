@@ -14,7 +14,6 @@ import net.steamshard.darkmatter.audio.AudioService
 import net.steamshard.darkmatter.ecs.component.*
 import net.steamshard.darkmatter.event.GameEvent
 import net.steamshard.darkmatter.event.GameEventManager
-import kotlin.math.min
 
 private val LOG = logger<PowerUpSystem>()
 

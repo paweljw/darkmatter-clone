@@ -1,12 +1,11 @@
 package net.steamshard.darkmatter.screen
 
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import ktx.async.KtxAsync
 import ktx.collections.gdxArrayOf
 import ktx.log.logger
 import net.steamshard.darkmatter.DarkMatter
-import net.steamshard.darkmatter.asset.MusicAsset
 import net.steamshard.darkmatter.asset.SoundAsset
 import net.steamshard.darkmatter.asset.TextureAsset
 import net.steamshard.darkmatter.asset.TextureAtlasAsset

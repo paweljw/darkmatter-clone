@@ -4,10 +4,8 @@ import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.PooledEngine
 import com.badlogic.gdx.Application.LOG_DEBUG
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.utils.viewport.FitViewport
 import ktx.app.KtxGame
 import ktx.assets.async.AssetStorage
@@ -20,7 +18,6 @@ import net.steamshard.darkmatter.audio.DefaultAudioService
 import net.steamshard.darkmatter.ecs.system.*
 import net.steamshard.darkmatter.event.GameEventManager
 import net.steamshard.darkmatter.screen.BaseScreen
-import net.steamshard.darkmatter.screen.GameScreen
 import net.steamshard.darkmatter.screen.LoadingScreen
 
 private val LOG = logger<DarkMatter>()
@@ -33,7 +30,7 @@ const val V_WIDTH_PIXELS = 135f
 const val V_HEIGHT_PIXELS = 240f
 
 class DarkMatter : KtxGame<BaseScreen>() {
-    val batch : Batch by lazy { SpriteBatch(1000) }
+    private val batch : Batch by lazy { SpriteBatch(1000) }
     val uiViewport = FitViewport(V_WIDTH_PIXELS, V_HEIGHT_PIXELS)
     val gameViewport = FitViewport(V_WIDTH, V_HEIGHT)
     val gameEventManager = GameEventManager()
@@ -46,7 +43,7 @@ class DarkMatter : KtxGame<BaseScreen>() {
     val engine : Engine by lazy {
         PooledEngine().apply {
             val atlas = assets[TextureAtlasAsset.GAME_GRAPHICS.descriptor]
-            val backgroundTexture = assets[TextureAsset.BACKGROUDND.descriptor]
+            val backgroundTexture = assets[TextureAsset.BACKGROUND.descriptor]
 
             addSystem(PlayerInputSystem(gameViewport))
             addSystem(MoveSystem())

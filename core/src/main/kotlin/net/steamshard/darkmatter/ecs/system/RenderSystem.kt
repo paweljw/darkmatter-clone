@@ -6,7 +6,6 @@ import com.badlogic.ashley.systems.SortedIteratingSystem
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.ashley.allOf
@@ -17,7 +16,9 @@ import net.steamshard.darkmatter.ecs.component.FacingDirection
 import net.steamshard.darkmatter.ecs.component.GraphicComponent
 import net.steamshard.darkmatter.ecs.component.PowerUp
 import net.steamshard.darkmatter.ecs.component.TransformComponent
-import net.steamshard.darkmatter.event.*
+import net.steamshard.darkmatter.event.GameEvent
+import net.steamshard.darkmatter.event.GameEventListener
+import net.steamshard.darkmatter.event.GameEventManager
 import kotlin.math.min
 
 private val LOG = logger<RenderSystem>()

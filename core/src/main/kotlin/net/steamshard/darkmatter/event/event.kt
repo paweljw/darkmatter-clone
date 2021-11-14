@@ -26,6 +26,13 @@ sealed class GameEvent {
         override fun toString() = "GameEventCollectPowerUp(type=$type)"
     }
 
+    object PlayerHit : GameEvent() {
+        lateinit var player: Entity
+        var life = 0f
+        var maxLife = 0f
+
+        override fun toString() = "PlayerHit(player=$player, life=$life, maxLife=$maxLife)"
+    }
 }
 
 interface GameEventListener {

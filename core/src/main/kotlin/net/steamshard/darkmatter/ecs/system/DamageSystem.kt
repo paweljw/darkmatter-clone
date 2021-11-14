@@ -41,6 +41,11 @@ class DamageSystem(
             }
 
             player.life -= damage
+            gameEventManager.dispatchEvent(GameEvent.PlayerHit.apply {
+                this.player = entity
+                life = player.life
+                maxLife = player.maxLife
+            })
 
             if(player.life <= 0) {
                 entity.addComponent<RemoveComponent>(engine) {

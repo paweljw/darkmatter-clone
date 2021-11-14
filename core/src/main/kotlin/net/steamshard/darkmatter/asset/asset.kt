@@ -12,14 +12,16 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram
 
 enum class TextureAsset(
     fileName: String,
-    val descriptor: AssetDescriptor<Texture> = AssetDescriptor(fileName, Texture::class.java)
+    directory: String = "graphics",
+    val descriptor: AssetDescriptor<Texture> = AssetDescriptor("$directory/$fileName", Texture::class.java)
 ) {
     BACKGROUND("background.png")
 }
 
 enum class TextureAtlasAsset(
     fileName: String,
-    val descriptor: AssetDescriptor<TextureAtlas> = AssetDescriptor(fileName, TextureAtlas::class.java)
+    directory: String = "graphics",
+    val descriptor: AssetDescriptor<TextureAtlas> = AssetDescriptor("$directory/$fileName", TextureAtlas::class.java)
 ) {
     GAME_GRAPHICS("darkmatter.atlas")
 }

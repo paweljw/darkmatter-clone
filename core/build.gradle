@@ -14,11 +14,12 @@ dependencies {
 	api "io.github.libktx:ktx-graphics:$ktxVersion"
 	api "io.github.libktx:ktx-collections:$ktxVersion"
 	api "io.github.libktx:ktx-preferences:$ktxVersion"
+	api "io.github.libktx:ktx-style:$ktxVersion"
+	api "io.github.libktx:ktx-scene2d:$ktxVersion"
+	api "io.github.libktx:ktx-actors:$ktxVersion"
 	api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 	api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion"
 }
-
-project.ext.texturePacker = [ "raw/", "assets/", "darkmatter" ]
 
 // Import the texture packer
 import com.badlogic.gdx.tools.texturepacker.TexturePacker
@@ -26,9 +27,8 @@ import com.badlogic.gdx.tools.texturepacker.TexturePacker
 // Add a new task that packs the textures for you
 task texturePacker {
   doLast {
-    if (project.ext.has('texturePacker')) {
-      logger.info "Calling TexturePacker: "+texturePacker
-      TexturePacker.process(texturePacker[0], texturePacker[1], texturePacker[2])
-    }
+	  logger.info "TexturePacker: graphics"
+	  TexturePacker.process("raw/graphics", "assets/graphics", "darkmatter")
+	  TexturePacker.process("raw/ui", "assets/ui", "ui")
   }
 }

@@ -7,6 +7,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Preferences
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.FitViewport
 import ktx.app.KtxGame
 import ktx.assets.async.AssetStorage
@@ -32,7 +33,12 @@ const val V_WIDTH_PIXELS = 135f
 const val V_HEIGHT_PIXELS = 240f
 
 class DarkMatter : KtxGame<BaseScreen>() {
-    private val batch : Batch by lazy { SpriteBatch(1000) }
+    private val batch : Batch by lazy { SpriteBatch() }
+    val stage: Stage by lazy {
+        val result = Stage(uiViewport, batch)
+        Gdx.app.input.inputProcessor = result
+        result
+    }
     val uiViewport = FitViewport(V_WIDTH_PIXELS, V_HEIGHT_PIXELS)
     val gameViewport = FitViewport(V_WIDTH, V_HEIGHT)
     val gameEventManager = GameEventManager()
@@ -89,6 +95,7 @@ class DarkMatter : KtxGame<BaseScreen>() {
 
     override fun dispose() {
         super.dispose()
+        stage.dispose()
         batch.dispose()
         assets.dispose()
     }
